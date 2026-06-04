@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CloudFlow — Modern Ekipler İçin Proje Yönetimi</title>
+  <style>
+    :root { --ink:#0f172a; --muted:#64748b; --brand:#4f46e5; --brand2:#7c3aed; --bg:#ffffff; --soft:#f8fafc; --line:#e2e8f0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+    /* Demo bilgi şeridi */
+    .demo-bar { background:#0f172a; color:#cbd5e1; font-size:13px; padding:8px 16px; text-align:center; }
+    .demo-bar b { color:#a5b4fc; }
+    .demo-bar a { color:#818cf8; text-decoration:underline; cursor:pointer; }
+
+    header { position: sticky; top: 0; background: rgba(255,255,255,.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); z-index: 10; }
+    nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { font-weight: 800; font-size: 20px; display: flex; align-items: center; gap: 8px; }
+    .logo .dot { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, var(--brand), var(--brand2)); }
+    .navlinks { display: flex; gap: 28px; align-items: center; }
+    .navlinks a { color: var(--muted); font-weight: 500; cursor: pointer; font-size: 15px; }
+    .navlinks a:hover, .navlinks a.active { color: var(--ink); }
+    .btn { background: var(--brand); color: #fff !important; padding: 10px 18px; border-radius: 10px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; }
+    .btn:hover { background: #4338ca; }
+    .btn.ghost { background: transparent; color: var(--brand) !important; border: 1px solid var(--line); }
+
+    section { padding: 72px 0; }
+    .view { display: none; }
+    .view.active { display: block; animation: fade .25s ease; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .hero h1 { font-size: 52px; line-height: 1.1; letter-spacing: -1.5px; max-width: 720px; }
+    .hero p { font-size: 20px; color: var(--muted); margin: 20px 0 32px; max-width: 600px; }
+    .hero .cta-row { display: flex; gap: 14px; }
+    .badge { display:inline-block; background:#eef2ff; color:var(--brand); font-weight:600; font-size:13px; padding:6px 12px; border-radius:999px; margin-bottom:20px; }
+    .logos { display:flex; gap:32px; margin-top:56px; opacity:.5; flex-wrap:wrap; font-weight:700; color:var(--muted); }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
+    .card { border: 1px solid var(--line); border-radius: 16px; padding: 28px; background: var(--soft); }
+    .card .ico { width: 44px; height: 44px; border-radius: 11px; background: linear-gradient(135deg,var(--brand),var(--brand2)); margin-bottom: 16px; }
+    .card h3 { font-size: 18px; margin-bottom: 8px; }
+    .card p { color: var(--muted); font-size: 15px; }
+    h2.section-title { font-size: 38px; letter-spacing: -1px; text-align:center; }
+    .section-sub { text-align:center; color:var(--muted); font-size:18px; margin-top:12px; }
+
+    /* Fiyatlandırma */
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+    .plan { border: 1px solid var(--line); border-radius: 18px; padding: 32px; position: relative; }
+    .plan.pop { border: 2px solid var(--brand); box-shadow: 0 20px 40px -20px rgba(79,70,229,.4); }
+    .plan .tag { position:absolute; top:-12px; left:32px; background:var(--brand); color:#fff; font-size:12px; font-weight:700; padding:4px 12px; border-radius:999px; }
+    .plan h3 { font-size: 20px; }
+    .plan .price { font-size: 44px; font-weight: 800; margin: 12px 0; letter-spacing:-1px; }
+    .plan .price span { font-size: 16px; color: var(--muted); font-weight: 500; }
+    .plan ul { list-style: none; margin: 20px 0; }
+    .plan li { padding: 8px 0; color: var(--muted); font-size: 15px; display:flex; gap:8px; }
+    .plan li::before { content: "✓"; color: var(--brand); font-weight: 700; }
+    .plan .btn { width: 100%; text-align:center; display:block; }
+
+    /* İletişim */
+    .form { max-width: 520px; margin: 40px auto 0; display: grid; gap: 16px; }
+    .form input, .form textarea { padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; font-size: 15px; font-family: inherit; }
+    footer { border-top: 1px solid var(--line); padding: 40px 0; color: var(--muted); text-align:center; font-size:14px; }
+    @media (max-width: 800px){ .grid,.plans{grid-template-columns:1fr} .hero h1{font-size:38px} }
+  </style>
+</head>
+<body>
+  <div class="demo-bar">
+    🎬 <b>RevenuePulse Demo</b> — Sen bir potansiyel müşterisin. Gez, <b>Pricing</b> sayfasına 2 kez gir.
+    Satış ekibinin canlı ekranını ayrı sekmede aç: <a href="/dashboard" target="_blank">/dashboard</a>
+    &nbsp;·&nbsp; <a onclick="RP.reset&&RP.reset()">Yeni ziyaretçi olarak başla</a>
+  </div>
+
+  <header>
+    <div class="wrap">
+      <nav>
+        <div class="logo"><span class="dot"></span> CloudFlow</div>
+        <div class="navlinks">
+          <a data-nav="home" class="active">Ana Sayfa</a>
+          <a data-nav="features">Özellikler</a>
+          <a data-nav="pricing">Fiyatlandırma</a>
+          <a data-nav="contact">İletişim</a>
+          <button class="btn" data-nav="pricing">Ücretsiz Dene</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ANA SAYFA -->
+  <div class="view active" id="view-home">
+    <section class="hero">
+      <div class="wrap">
+        <span class="badge">⚡ 2026'nın en hızlı büyüyen iş yönetim platformu</span>
+        <h1>Ekibinizin işi tek bir akışta birleşsin.</h1>
+        <p>CloudFlow; görevleri, hedefleri ve otomasyonları tek panelde toplar. Kurulum 2 dakika, sonuç ilk günden.</p>
+        <div class="cta-row">
+          <button class="btn" data-nav="pricing">Planları Gör</button>
+          <button class="btn ghost" data-nav="features">Nasıl Çalışır?</button>
+        </div>
+        <div class="logos"><span>VERTEX</span><span>NIMBUS</span><span>ORBIT</span><span>HELIOS</span><span>ACME</span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ÖZELLİKLER -->
+  <div class="view" id="view-features">
+    <section>
+      <div class="wrap">
+        <h2 class="section-title">Hızlı ekipler için kurulmuş.</h2>
+        <p class="section-sub">İşinizi büyütmek için ihtiyacınız olan her şey, tek yerde.</p>
+        <div class="grid">
+          <div class="card"><div class="ico"></div><h3>Akıllı Otomasyon</h3><p>Tekrar eden işleri kurallarla otomatikleştirin, ekibiniz asıl işe odaklansın.</p></div>
+          <div class="card"><div class="ico"></div><h3>Gerçek Zamanlı Panel</h3><p>Tüm projelerin nabzını tek ekrandan tutun, darboğazları anında görün.</p></div>
+          <div class="card"><div class="ico"></div><h3>200+ Entegrasyon</h3><p>Slack, GitHub, HubSpot ve daha fazlasıyla tek tıkla bağlanın.</p></div>
+          <div class="card"><div class="ico"></div><h3>Kurumsal Güvenlik</h3><p>SOC 2, SSO ve rol bazlı erişim ile verileriniz güvende.</p></div>
+          <div class="card"><div class="ico"></div><h3>Mobil + Masaüstü</h3><p>Nerede olursanız olun ekibinizle senkronize kalın.</p></div>
+          <div class="card"><div class="ico"></div><h3>Sınırsız Geçmiş</h3><p>Hiçbir veriniz kaybolmaz; tüm değişiklikler izlenebilir.</p></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FİYATLANDIRMA -->
+  <div class="view" id="view-pricing">
+    <section>
+      <div class="wrap">
+        <h2 class="section-title">Basit, şeffaf fiyatlandırma.</h2>
+        <p class="section-sub">İstediğiniz zaman iptal edin. Kredi kartı gerekmez.</p>
+        <div class="plans">
+          <div class="plan">
+            <h3>Starter</h3>
+            <div class="price">₺0<span>/ay</span></div>
+            <ul><li>5 kullanıcıya kadar</li><li>Temel panolar</li><li>10 otomasyon</li><li>Topluluk desteği</li></ul>
+            <button class="btn ghost" data-nav="contact">Başla</button>
+          </div>
+          <div class="plan pop">
+            <div class="tag">EN POPÜLER</div>
+            <h3>Growth</h3>
+            <div class="price">₺890<span>/ay</span></div>
+            <ul><li>25 kullanıcıya kadar</li><li>Gelişmiş otomasyon</li><li>Tüm entegrasyonlar</li><li>Öncelikli destek</li></ul>
+            <button class="btn" data-nav="contact">Demo Talep Et</button>
+          </div>
+          <div class="plan">
+            <h3>Enterprise</h3>
+            <div class="price">Özel</div>
+            <ul><li>Sınırsız kullanıcı</li><li>SSO + SOC 2</li><li>Özel SLA</li><li>Adanmış müşteri yöneticisi</li></ul>
+            <button class="btn ghost" data-nav="contact">Satışla Görüş</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- İLETİŞİM -->
+  <div class="view" id="view-contact">
+    <section>
+      <div class="wrap">
+        <h2 class="section-title">Ekibinizle tanışalım.</h2>
+        <p class="section-sub">15 dakikalık kişisel bir demo ayarlayalım.</p>
+        <form class="form" id="demo-form" onsubmit="event.preventDefault(); this.querySelector('button').innerText='✓ Talebiniz alındı!';">
+          <input name="name" placeholder="Adınız Soyadınız" required />
+          <input name="email" type="email" placeholder="İş e-postanız" required />
+          <input name="company" placeholder="Şirketiniz" />
+          <textarea name="msg" rows="3" placeholder="Neyi çözmeye çalışıyorsunuz?"></textarea>
+          <button class="btn" type="submit">Demo Talep Et</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <footer><div class="wrap">© 2026 CloudFlow (RevenuePulse demo için kurgusal marka) · Bu site bir gösterimdir.</div></footer>
+
+  <!-- TEK SATIR: RevenuePulse tracker -->
+  <script src="/pulse.js" data-key="demo_site_key_123"></script>
+  <script>
+    // SPA gezinme — her "sayfa" geçişinde RevenuePulse'a sanal page_view bildir
+    var titles = { home:"Ana Sayfa", features:"Özellikler", pricing:"Fiyatlandırma — CloudFlow", contact:"İletişim" };
+    function go(name) {
+      if (window._RP_flushTime) window._RP_flushTime(); // önceki sayfanın süresini gönder
+      document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
+      document.getElementById("view-" + name).classList.add("active");
+      document.querySelectorAll("[data-nav]").forEach(function(a){ a.classList.toggle("active", a.getAttribute("data-nav")===name && a.tagName==="A"); });
+      window.scrollTo(0,0);
+      var vurl = location.origin + "/" + (name==="home"?"":name);
+      if (window.RP) window.RP.pageView(vurl, titles[name]);
+    }
+    document.querySelectorAll("[data-nav]").forEach(function(el){
+      el.addEventListener("click", function(){ go(el.getAttribute("data-nav")); });
+    });
+    // RP.reset'i demo barından çağırabilmek için
+    window.RP = window.RP || {}; window.RP.reset = window.RP_reset;
+  </script>
+</body>
+</html>

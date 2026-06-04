@@ -1,0 +1,12 @@
+{
+  "name": "revenuepulse-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RevenuePulse self-contained investor demo (zero dependencies)",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RevenuePulse — Satış Ekibi Canlı Ekranı</title>
+  <style>
+    :root { --bg:#0b1020; --panel:#131a2e; --panel2:#1a2238; --line:#26304d; --ink:#e7ecf6; --muted:#8a96b3; --hot:#ff4d4d; --warm:#f5a623; --cold:#4a90d9; --brand:#6366f1; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 28px; border-bottom:1px solid var(--line); background:var(--panel); }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:18px; }
+    .brand .dot { width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7); box-shadow:0 0 16px #6366f1aa; }
+    .status { display:flex; align-items:center; gap:18px; font-size:13px; color:var(--muted); }
+    .pill { display:flex; align-items:center; gap:7px; background:var(--panel2); padding:6px 12px; border-radius:999px; }
+    .live { width:8px;height:8px;border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e; animation:pulse 1.4s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    .layout { display:grid; grid-template-columns: 1fr 340px; gap:20px; padding:24px 28px; max-width:1280px; margin:0 auto; }
+    .col-title { font-size:13px; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:14px; font-weight:700; }
+
+    .empty { border:2px dashed var(--line); border-radius:16px; padding:64px 24px; text-align:center; color:var(--muted); }
+    .empty .big { font-size:40px; margin-bottom:12px; }
+
+    /* Lead kartı */
+    .cards { display:flex; flex-direction:column; gap:16px; }
+    .lead { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:22px; position:relative; overflow:hidden; animation:slidein .4s cubic-bezier(.2,.8,.2,1); }
+    @keyframes slidein { from{opacity:0; transform:translateY(-12px) scale(.98)} to{opacity:1; transform:none} }
+    .lead.hot { border-color:#ff4d4d55; box-shadow:0 0 0 1px #ff4d4d33, 0 16px 40px -16px #ff4d4d44; }
+    .lead.flash { animation:flash 1s ease; }
+    @keyframes flash { 0%{box-shadow:0 0 0 2px #ff4d4d, 0 0 60px #ff4d4d66} 100%{box-shadow:0 0 0 1px #ff4d4d33} }
+
+    .lead-head { display:flex; align-items:center; gap:16px; }
+    .gauge { --val:0; --c:var(--hot); width:72px; height:72px; border-radius:50%; flex-shrink:0;
+      background: conic-gradient(var(--c) calc(var(--val)*1%), #2a3354 0);
+      display:flex; align-items:center; justify-content:center; position:relative; }
+    .gauge::before { content:""; position:absolute; inset:6px; border-radius:50%; background:var(--panel); }
+    .gauge span { position:relative; font-weight:800; font-size:22px; }
+    .lead-id h3 { font-size:18px; }
+    .lead-id .sub { color:var(--muted); font-size:13px; margin-top:2px; }
+    .temp { margin-left:auto; font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:1px; padding:6px 12px; border-radius:999px; }
+    .temp.hot{ background:#ff4d4d22; color:#ff7a7a; } .temp.warm{ background:#f5a62322; color:#f7c069; } .temp.cold{ background:#4a90d922; color:#7db4e8; }
+
+    .block { margin-top:16px; background:var(--panel2); border-radius:12px; padding:14px 16px; }
+    .block .lbl { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px; font-weight:700; display:flex; align-items:center; gap:6px; }
+    .block .val { font-size:15px; line-height:1.5; }
+    .script { font-style:italic; color:#cdd6ee; border-left:3px solid var(--brand); padding-left:12px; }
+    .reason { color:var(--muted); font-size:14px; }
+    .actions { display:flex; gap:10px; margin-top:14px; }
+    .act { flex:1; text-align:center; padding:11px; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; border:none; }
+    .act.call { background:var(--hot); color:#fff; } .act.copy { background:var(--panel2); color:var(--ink); border:1px solid var(--line); }
+    .meta { display:flex; gap:14px; margin-top:14px; font-size:12px; color:var(--muted); flex-wrap:wrap; }
+    .meta b { color:var(--ink); }
+    .engine { font-size:11px; color:var(--muted); position:absolute; top:14px; right:18px; }
+
+    /* Aktivite şeridi */
+    .feed { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px; height:fit-content; max-height:80vh; overflow:auto; }
+    .act-item { display:flex; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px; }
+    .act-item:last-child{border:0;}
+    .act-item .ico { font-size:14px; } .act-item .who { color:var(--muted); }
+    .act-item .ev { color:var(--ink); }
+    .act-item time { margin-left:auto; color:var(--muted); font-size:11px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> RevenuePulse <span style="color:var(--muted);font-weight:500;font-size:14px;">· Satış Ekibi Ekranı</span></div>
+    <div class="status">
+      <div class="pill"><span class="live"></span> Canlı</div>
+      <div class="pill" id="engine-pill">Motor: …</div>
+      <div class="pill" id="count-pill">0 sıcak lead</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="col-title">🔥 Aksiyon Gerektiren Lead'ler</div>
+      <div class="cards" id="cards">
+        <div class="empty" id="empty">
+          <div class="big">📡</div>
+          <div>Canlı sinyaller bekleniyor…</div>
+          <div style="margin-top:8px;font-size:13px;">Müşteri sekmesinde <b>Pricing</b> sayfasına 2 kez gir — kart burada belirecek.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="col-title">Canlı Aktivite</div>
+      <div class="feed" id="feed"><div class="act-item"><span class="who">Henüz aktivite yok…</span></div></div>
+    </div>
+  </div>
+
+  <script>
+    var cards = {}; // visitor_id -> element
+    var hotCount = 0;
+    var EV = { page_view:"📄 sayfayı gördü", click:"🖱️ tıkladı", scroll:"📜 kaydırdı", form_focus:"⌨️ forma başladı", form_submit:"📨 form gönderdi", time_on_page:"⏱️ vakit geçirdi" };
+
+    function shortId(id){ return id.replace(/^v_/,"").slice(0,8); }
+    function now(){ return new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit",second:"2-digit"}); }
+    function tempColor(t){ return t==="hot"?"var(--hot)":t==="warm"?"var(--warm)":"var(--cold)"; }
+
+    function renderCard(d) {
+      var el = cards[d.visitor_id];
+      var isNew = !el;
+      if (isNew) { el = document.createElement("div"); cards[d.visitor_id] = el; }
+      el.className = "lead " + d.temperature + (d.temperature==="hot"?" flash":"");
+      var s = d.signals || {};
+      el.innerHTML =
+        '<div class="engine">'+ (d.engine||"") +'</div>'+
+        '<div class="lead-head">'+
+          '<div class="gauge" style="--val:'+d.score+';--c:'+tempColor(d.temperature)+'"><span>'+d.score+'</span></div>'+
+          '<div class="lead-id"><h3>'+ (d.company||"Bilinmeyen firma") +'</h3>'+
+            '<div class="sub">Ziyaretçi #'+ shortId(d.visitor_id) +'</div></div>'+
+          '<div class="temp '+d.temperature+'">'+ ({hot:"SICAK",warm:"ILIK",cold:"SOĞUK"}[d.temperature]) +'</div>'+
+        '</div>'+
+        '<div class="block"><div class="lbl">⚡ Önerilen Aksiyon</div><div class="val">'+ d.recommended_action +'</div></div>'+
+        '<div class="block"><div class="lbl">💬 Açılış Cümlesi</div><div class="val script">"'+ d.talking_script +'"</div></div>'+
+        '<div class="block"><div class="lbl">🧠 Gerekçe</div><div class="val reason">'+ d.reasoning +'</div></div>'+
+        '<div class="meta">'+
+          '<span><b>'+ (s.pricingViews||0) +'</b>× fiyat sayfası</span>'+
+          '<span><b>'+ (s.demoClicks||0) +'</b> demo tıklama</span>'+
+          '<span><b>'+ (s.pricingTime||0) +'sn</b> fiyatta</span>'+
+          '<span><b>'+ (s.pageViews||0) +'</b> sayfa</span>'+
+        '</div>'+
+        '<div class="actions"><button class="act call">📞 Şimdi Ara</button>'+
+          '<button class="act copy" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.closest(\'.lead\').querySelector(\'.script\').innerText)">📋 Cümleyi Kopyala</button></div>';
+
+      var container = document.getElementById("cards");
+      document.getElementById("empty") && document.getElementById("empty").remove();
+      if (isNew) container.prepend(el);
+      else { container.prepend(el); } // en güncel üstte
+
+      // sıcak lead sayacı
+      hotCount = Object.values(cards).filter(function(c){ return c.classList.contains("hot"); }).length;
+      document.getElementById("count-pill").textContent = hotCount + " sıcak lead";
+    }
+
+    function addActivity(d) {
+      var feed = document.getElementById("feed");
+      if (feed.querySelector(".who") && feed.children.length===1 && /Henüz/.test(feed.textContent)) feed.innerHTML="";
+      var item = document.createElement("div");
+      item.className = "act-item";
+      var label = EV[d.event.event_type] || d.event.event_type;
+      item.innerHTML = '<span class="ico">•</span><span class="ev"><span class="who">'+ (d.company||shortId(d.visitor_id)) +'</span> '+ label +'</span><time>'+ now() +'</time>';
+      feed.prepend(item);
+      while (feed.children.length > 40) feed.removeChild(feed.lastChild);
+    }
+
+    var es = new EventSource("/stream");
+    es.addEventListener("hello", function(e){
+      var d = JSON.parse(e.data);
+      document.getElementById("engine-pill").textContent = "Motor: " + (d.engine==="claude"?"Claude AI":"Kural tabanlı");
+    });
+    es.addEventListener("activity", function(e){ addActivity(JSON.parse(e.data)); });
+    es.addEventListener("score", function(e){ renderCard(JSON.parse(e.data)); });
+    es.onerror = function(){ document.getElementById("engine-pill").textContent = "Bağlantı yeniden kuruluyor…"; };
+  </script>
+</body>
+</html>
